@@ -38,9 +38,9 @@ a{color:inherit;text-decoration:none}
 .big-stat{font-size:52px;line-height:.9;font-weight:900;letter-spacing:-.06em}
 .small{font-size:11px;line-height:1.35} .muted{color:var(--muted)} .black .muted{color:#bdb7b1}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.formgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.formgrid>*{min-width:0}
 label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 5px}
-input,select,textarea{width:100%;border:1.5px solid var(--ink);border-radius:0;background:var(--paper);padding:12px 10px;outline:none}
+input,select,textarea{width:100%;min-width:0;max-width:100%;border:1.5px solid var(--ink);border-radius:0;background:var(--paper);padding:12px 10px;outline:none}
 textarea{min-height:84px;resize:vertical}
 .btn{display:inline-block;border:1.5px solid var(--ink);background:var(--paper);padding:12px 14px;font-weight:850;text-transform:uppercase;letter-spacing:.04em}
 .btn.dark{background:var(--ink);color:var(--cream)} .btn.full{width:100%;margin-top:12px}
@@ -78,7 +78,7 @@ textarea{min-height:84px;resize:vertical}
 .history-card{border-top:1.5px solid;padding:14px 0} .history-card:first-child{border-top:0}
 .history-title{font-size:22px;font-weight:850} .history-top{display:flex;justify-content:space-between;gap:12px}
 .metric{border:1.5px solid;padding:13px;min-height:104px;background:var(--paper)}
-.metric .value{font-size:28px;font-weight:850;margin-top:16px}
+.metric .value{font-size:28px;font-weight:850;margin-top:16px}.default-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:10px}.default-item{border:1.5px solid var(--ink);background:var(--paper);padding:10px;min-width:0}.default-name{font-size:10px;line-height:1.15;font-weight:850;text-transform:uppercase;letter-spacing:.04em}.default-value{font-size:20px;line-height:1;font-weight:900;margin-top:7px}
 .progress-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-top:1px solid}
 .chart{height:130px;display:flex;align-items:flex-end;gap:7px;border-bottom:1.5px solid;margin-top:14px;padding:0 4px}
 .bar{flex:1;background:var(--ink);min-height:3px;position:relative}
@@ -99,6 +99,9 @@ textarea{min-height:84px;resize:vertical}
 .modalbox{max-width:660px;margin:20px auto;background:var(--paper);border:2px solid;padding:18px}
 .close{float:right;border:0;background:none;font-size:24px}
 @media (max-width:560px) {
+  .formgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+  .formgrid input,.formgrid select{font-size:16px;padding:10px 8px}
+  .formgrid input[type="date"]{font-size:15px}
   .fields{grid-template-columns:1fr 1fr}
   .machine-layout{grid-template-columns:92px 1fr}
   .machine-thumb{width:92px;height:92px}
@@ -179,6 +182,11 @@ textarea{min-height:84px;resize:vertical}
       <div><label>Goal kg</label><input id="goalWeight" type="number" step=".1" placeholder="50.5"></div>
     </div>
     <button class="btn full" onclick="saveProfile()">Update</button>
+    <div style="margin-top:22px">
+      <div class="section-kicker">Current machine defaults</div>
+      <p class="small">These are the values FORM will prefill for your next workout. They start from the built-in defaults and change to your latest logged load.</p>
+      <div class="default-grid" id="defaultWeightGrid"></div>
+    </div>
   </div>
   <div class="block paper">
     <div class="section-kicker">Training rhythm</div>
@@ -436,6 +444,17 @@ function renderProgress(){
   let counts = days.map(d => data.sessions.filter(s => { let x = new Date(s.date); x.setHours(0,0,0,0); return +x===+d }).length);
   const max = Math.max(1, ...counts);
   document.getElementById("weekChart").innerHTML = days.map((d,i)=>`<div class="bar" style="height:${Math.max(3, counts[i]/max*100)}%"><span>${d.toLocaleDateString(undefined,{weekday:"narrow"})}</span></div>`).join("");
+  const defaultOrder = [...new Set([...PLANS.A, ...PLANS.B, ...PLANS.C])];
+  const defaultGrid = document.getElementById("defaultWeightGrid");
+  if(defaultGrid){
+    defaultGrid.innerHTML = defaultOrder.map(id => {
+      const ex = EX[id];
+      const last = data.last[id] || {};
+      const value = (last.weight !== undefined && last.weight !== "") ? last.weight : ex.defaultLoad;
+      const unit = typeof value === "number" ? " kg" : "";
+      return `<div class="default-item"><div class="default-name">${ex.name}</div><div class="default-value">${value}${unit}</div></div>`;
+    }).join("");
+  }
   renderCalendar();
   const used = {};
   data.sessions.forEach(s => s.ids.forEach(id => { const r = s.results[id]; if(r && r.weight!=="") used[id] = r; }));
@@ -477,7 +496,7 @@ function renderMachineLibrary(){
             <div class="exmuscle">${ex.muscles}</div>
             <div class="small" style="margin-top:8px">${ex.setup}</div>
             <div class="btnrow">
-              <a class="btn dark" href="${ex.machineVideo}" target="_blank" rel="noopener">Machine setup video ↗</a>
+              <a class="btn dark" href="${ex.machineVideo}" target="_blank" rel="noopener">Machine setup video</a>
               <button class="btn" type="button" onclick="toggleMachineGuide(this)">Show FORM guide</button>
             </div>
           </div>
