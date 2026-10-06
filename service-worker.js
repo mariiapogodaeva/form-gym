@@ -1,4 +1,4 @@
-const CACHE = "form-gym-v3";
+const CACHE = "form-gym-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
