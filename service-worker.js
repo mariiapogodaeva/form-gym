@@ -1,9 +1,12 @@
-const CACHE = "form-gym-v8";
+const CACHE = "form-gym-v9";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./icon.svg",
+  "./session-v9-core.js?v=9",
+  "./session-v9-ui.js?v=9",
+  "./session-v9-init.js?v=9",
   "./assets/exercises/calf-raise/form-guide.png",
   "./assets/exercises/biceps-curl/form-guide.png",
   "./assets/exercises/seated-leg-press/form-guide.png",
