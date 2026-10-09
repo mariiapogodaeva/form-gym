@@ -1,4 +1,4 @@
-const CACHE = "form-gym-v11";
+const CACHE = "form-gym-v12";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,6 +7,7 @@ const APP_SHELL = [
   "./session-v10-core.js?v=10",
   "./session-v10-ui.js?v=11",
   "./session-v10-init.js?v=10",
+  "./session-v12-extras.js?v=12",
   "./assets/exercises/calf-raise/form-guide.png",
   "./assets/exercises/biceps-curl/form-guide.png",
   "./assets/exercises/seated-leg-press/form-guide.png",
